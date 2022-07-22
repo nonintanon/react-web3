@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react'
+import React, { useEffect } from "react";
 
-import { AppBar, Toolbar, Typography, Button, Chip, Stack } from '@mui/material';
+import {
+  AppBar, Box, Toolbar, Typography, Button, IconButton
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 import { initializeConnector } from '@web3-react/core'
 import { MetaMask } from '@web3-react/metamask'
 
 const [metaMask, hooks] = initializeConnector((actions) => new MetaMask(actions))
-
 const { useAccounts, useError, useIsActive } = hooks
 const contractChain = 55556
 
@@ -18,55 +20,51 @@ const getAddressTxt = (str, s = 6, e = 6) => {
 };
 
 function App() {
-
   const accounts = useAccounts()
-  const connector = metaMask
-  const isActive = useIsActive()
   const error = useError()
+  const isActive = useIsActive()
+  const connector = metaMask
 
   useEffect(() => {
     void metaMask.connectEagerly()
-    if (error) {
-      alert(error.message)
-    }
-  }, [error])
+  }, [])
 
-  const handleConnect = () => {
+  const handleLogin = () => {
     connector.activate(contractChain)
   }
 
-  const handleDisconnect = () => {
+  const handleLogout = () => {
     connector.deactivate()
   }
 
   return (
     <div>
-      <AppBar position="static" color="transparent">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            My DApp
-          </Typography>
-
-          {!isActive ?
-            <Button variant="contained"
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static">
+          <Toolbar>
+            <IconButton
+              size="large"
+              edge="start"
               color="inherit"
-              onClick={handleConnect}
+              aria-label="menu"
+              sx={{ mr: 2 }}
             >
-              Connect to Wallet
-            </Button>
-            :
-            <Stack direction="row" spacing={1}>
-              <Chip label={getAddressTxt(accounts[0])} />
-              <Button variant="contained"
-                color="inherit"
-                onClick={handleDisconnect}
-              >
-                Disconnect
-              </Button>
-            </Stack>
-          }
-        </Toolbar>
-      </AppBar>
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              MyToken
+            </Typography>
+            {!isActive ?
+              <Button color="inherit" onClick={handleLogin}>Connect</Button>
+              :
+              <>
+                <Button color="inherit">{getAddressTxt(accounts[0])}</Button>
+                <Button color="inherit" onClick={handleLogout}>Disconnect</Button>
+              </>
+            }
+          </Toolbar>
+        </AppBar>
+      </Box>
     </div>
   );
 }
